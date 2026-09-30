@@ -23,8 +23,14 @@ public class User {
     @Column(nullable = false, unique = true, length = 160)
     private String email;
 
+    @Column(unique = true, length = 60)
+    private String username;
+
     @Column(nullable = false)
     private String passwordHash;
+
+    @Column(length = 255)
+    private String accessKeyHash;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -61,12 +67,28 @@ public class User {
         this.email = email;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getPasswordHash() {
         return passwordHash;
     }
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public String getAccessKeyHash() {
+        return accessKeyHash;
+    }
+
+    public void setAccessKeyHash(String accessKeyHash) {
+        this.accessKeyHash = accessKeyHash;
     }
 
     public Role getRole() {

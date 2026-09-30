@@ -1,0 +1,94 @@
+package com.taller.auth.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.time.Instant;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "clientes")
+public class Client {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 160)
+    private String fullName;
+
+    @Column(nullable = false, length = 160)
+    private String alternateContactName;
+
+    @Column(nullable = false)
+    private LocalDate birthDate;
+
+    @Column(nullable = false, unique = true, length = 25)
+    private String personalPhone;
+
+    @Column(nullable = false, unique = true, length = 25)
+    private String workPhone;
+
+    @Column(nullable = false, unique = true, length = 160)
+    private String personalEmail;
+
+    @Column(nullable = false, unique = true, length = 160)
+    private String workEmail;
+
+    @Column(nullable = false, length = 255)
+    private String photoPath;
+
+    @Column(nullable = false, length = 120)
+    private String photoContentType;
+
+    @Column(nullable = false, length = 160)
+    private String street;
+
+    @Column(nullable = false, length = 120)
+    private String neighborhood;
+
+    @Column(nullable = false, length = 120)
+    private String municipality;
+
+    @Column(nullable = false, length = 120)
+    private String state;
+
+    @Column(nullable = false, length = 10)
+    private String postalCode;
+
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
+
+    public Long getId() { return id; }
+    public String getFullName() { return fullName; }
+    public String getAlternateContactName() { return alternateContactName; }
+    public LocalDate getBirthDate() { return birthDate; }
+    public String getPersonalPhone() { return personalPhone; }
+    public String getWorkPhone() { return workPhone; }
+    public String getPersonalEmail() { return personalEmail; }
+    public String getWorkEmail() { return workEmail; }
+    public String getPhotoPath() { return photoPath; }
+    public String getPhotoContentType() { return photoContentType; }
+    public String getStreet() { return street; }
+    public String getNeighborhood() { return neighborhood; }
+    public String getMunicipality() { return municipality; }
+    public String getState() { return state; }
+    public String getPostalCode() { return postalCode; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
+    public void setAlternateContactName(String alternateContactName) { this.alternateContactName = alternateContactName; }
+    public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
+    public void setPersonalPhone(String personalPhone) { this.personalPhone = personalPhone; }
+    public void setWorkPhone(String workPhone) { this.workPhone = workPhone; }
+    public void setPersonalEmail(String personalEmail) { this.personalEmail = personalEmail; }
+    public void setWorkEmail(String workEmail) { this.workEmail = workEmail; }
+    public void setPhotoPath(String photoPath) { this.photoPath = photoPath; }
+    public void setPhotoContentType(String photoContentType) { this.photoContentType = photoContentType; }
+    public void setStreet(String street) { this.street = street; }
+    public void setNeighborhood(String neighborhood) { this.neighborhood = neighborhood; }
+    public void setMunicipality(String municipality) { this.municipality = municipality; }
+    public void setState(String state) { this.state = state; }
+    public void setPostalCode(String postalCode) { this.postalCode = postalCode; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+}

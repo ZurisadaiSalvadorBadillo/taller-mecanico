@@ -1,6 +1,8 @@
 package com.taller.auth.controller;
 
 import com.taller.auth.dto.MessageResponse;
+import com.taller.auth.service.DuplicateClientException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -19,6 +21,12 @@ public class ApiExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<MessageResponse> handleIllegalArgument(IllegalArgumentException exception) {
         return ResponseEntity.badRequest().body(new MessageResponse(exception.getMessage()));
+    }
+
+    @ExceptionHandler({DuplicateClientException.class, DataIntegrityViolationException.class})
+    public ResponseEntity<MessageResponse> handleDuplicateClient() {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new MessageResponse("Ya existe un cliente con datos de contacto registrados."));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

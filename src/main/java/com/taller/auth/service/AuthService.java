@@ -4,6 +4,8 @@ import com.taller.auth.dto.AuthResponse;
 import com.taller.auth.dto.ForgotPasswordResponse;
 import com.taller.auth.dto.LoginRequest;
 import com.taller.auth.dto.MessageResponse;
+import com.taller.auth.dto.RegisterRequest;
+import com.taller.auth.model.Role;
 import com.taller.auth.dto.ResetPasswordRequest;
 import com.taller.auth.model.User;
 import com.taller.auth.repository.UserRepository;
@@ -39,11 +41,14 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password())
+                new UsernamePasswordAuthenticationToken(request.username(), request.password())
         );
 
-        User user = userRepository.findByEmail(request.email())
+        User user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new IllegalArgumentException("Credenciales invalidas"));
+        if (user.getAccessKeyHash() == null || !passwordEncoder.matches(request.accessKey(), user.getAccessKeyHash())) {
+            throw new IllegalArgumentException("Credenciales invalidas");
+        }
         String token = jwtService.generateToken(new CustomUserDetails(user));
 
         return new AuthResponse(
@@ -53,6 +58,34 @@ public class AuthService {
                 user.getEmail(),
                 user.getRole().name()
         );
+    }
+
+    @Transactional
+    public MessageResponse register(RegisterRequest request) {
+        if (!request.password().equals(request.confirmPassword())) {
+            throw new IllegalArgumentException("La confirmacion de contrasena no coincide.");
+        }
+        if (request.role() != Role.GERENTE && request.role() != Role.RECEPCIONISTA) {
+            throw new IllegalArgumentException("Solo se permiten los puestos Gerente o Recepcionista.");
+        }
+        if (userRepository.existsByUsername(request.username())) {
+            throw new IllegalArgumentException("El usuario ya esta registrado.");
+        }
+        if (userRepository.existsByEmail(request.email())) {
+            throw new IllegalArgumentException("El correo ya esta registrado.");
+        }
+
+        User user = new User();
+        user.setName(request.username());
+        user.setUsername(request.username());
+        user.setEmail(request.email().trim().toLowerCase());
+        user.setRole(request.role());
+        user.setPasswordHash(passwordEncoder.encode(request.password()));
+        user.setAccessKeyHash(passwordEncoder.encode(request.accessKey()));
+        user.setPasswordChangedAt(Instant.now());
+        userRepository.save(user);
+
+        return new MessageResponse("Registro creado correctamente. Ya puedes iniciar sesion.");
     }
 
     @Transactional
