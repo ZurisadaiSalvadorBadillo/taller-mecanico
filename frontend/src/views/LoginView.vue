@@ -1,138 +1,74 @@
 <script setup>
 import { ref } from 'vue'
 import api from '../services/api'
-import { localForgotPassword, localLogin, localRegister, localResetPassword } from '../services/localAuth'
 
 const emit = defineEmits(['logged-in'])
 
 const mode = ref('login')
-const name = ref('')
+const username = ref('')
 const email = ref('')
+const role = ref('RECEPCIONISTA')
 const password = ref('')
 const confirmPassword = ref('')
-const code = ref('')
-const newPassword = ref('')
+const accessKey = ref('')
 const loading = ref(false)
 const error = ref('')
 const success = ref('')
-const developmentResetCode = ref('')
 
-async function login() {
+function resetMessages() {
   error.value = ''
   success.value = ''
-  loading.value = true
+}
 
+function changeMode(nextMode) {
+  resetMessages()
+  mode.value = nextMode
+  password.value = ''
+  confirmPassword.value = ''
+  accessKey.value = ''
+}
+
+async function login() {
+  resetMessages()
+  loading.value = true
   try {
     const { data } = await api.post('/auth/login', {
-      email: email.value,
-      password: password.value
+      username: username.value.trim(),
+      password: password.value,
+      accessKey: accessKey.value
     })
     emit('logged-in', data)
-  } catch (err) {
-    try {
-      emit('logged-in', localLogin({ email: email.value, password: password.value }))
-    } catch (localErr) {
-      error.value = err.response?.data?.message || localErr.message || 'No se pudo iniciar sesion.'
-    }
+  } catch (requestError) {
+    error.value = requestError.response?.data?.message || 'No fue posible iniciar sesion.'
   } finally {
     loading.value = false
   }
 }
 
 async function register() {
-  error.value = ''
-  success.value = ''
-
+  resetMessages()
   if (password.value !== confirmPassword.value) {
-    error.value = 'Las contrasenas no coinciden.'
+    error.value = 'La confirmacion de contrasena no coincide.'
     return
   }
 
   loading.value = true
-
   try {
-    await api.post('/auth/register', {
-      name: name.value,
-      email: email.value,
-      password: password.value
-    })
-
-    const { data } = await api.post('/auth/login', {
-      email: email.value,
-      password: password.value
-    })
-    emit('logged-in', data)
-  } catch (err) {
-    try {
-      emit('logged-in', localRegister({
-        name: name.value,
-        email: email.value,
-        password: password.value
-      }))
-    } catch (localErr) {
-      error.value = err.response?.data?.message || localErr.message || 'No se pudo completar el registro.'
-    }
-  } finally {
-    loading.value = false
-  }
-}
-
-async function requestResetCode() {
-  error.value = ''
-  success.value = ''
-  developmentResetCode.value = ''
-  loading.value = true
-
-  try {
-    const { data } = await api.post('/auth/forgot-password', { email: email.value })
-    success.value = data.message
-    developmentResetCode.value = data.developmentResetCode || ''
-    mode.value = 'reset'
-  } catch (err) {
-    try {
-      const data = localForgotPassword(email.value)
-      success.value = data.message
-      developmentResetCode.value = data.developmentResetCode || ''
-      mode.value = 'reset'
-    } catch (localErr) {
-      error.value = err.response?.data?.message || localErr.message || 'No se pudo generar el codigo.'
-    }
-  } finally {
-    loading.value = false
-  }
-}
-
-async function resetPassword() {
-  error.value = ''
-  success.value = ''
-  loading.value = true
-
-  try {
-    const { data } = await api.post('/auth/reset-password', {
-      email: email.value,
-      code: code.value,
-      newPassword: newPassword.value
+    const { data } = await api.post('/auth/register', {
+      username: username.value.trim(),
+      email: email.value.trim(),
+      role: role.value,
+      accessKey: accessKey.value,
+      password: password.value,
+      confirmPassword: confirmPassword.value
     })
     success.value = data.message
     password.value = ''
-    code.value = ''
-    newPassword.value = ''
+    confirmPassword.value = ''
+    accessKey.value = ''
     mode.value = 'login'
-  } catch (err) {
-    try {
-      const data = localResetPassword({
-        email: email.value,
-        code: code.value,
-        newPassword: newPassword.value
-      })
-      success.value = data.message
-      password.value = ''
-      code.value = ''
-      newPassword.value = ''
-      mode.value = 'login'
-    } catch (localErr) {
-      error.value = err.response?.data?.message || localErr.message || 'No se pudo actualizar la contrasena.'
-    }
+  } catch (requestError) {
+    error.value = requestError.response?.data?.message || 'No fue posible completar el registro.'
   } finally {
     loading.value = false
   }
@@ -141,27 +77,51 @@ async function resetPassword() {
 
 <template>
   <section class="auth-page">
-    <div class="auth-panel">
-      <div class="brand-strip">
+    <main class="auth-panel" aria-labelledby="auth-title">
+      <header class="auth-header">
         <span class="brand-mark">TM</span>
         <div>
-          <p class="brand-kicker">Ordenes de reparacion</p>
-          <h1>Taller Mecanico</h1>
+          <p class="brand-kicker">Gestion operativa</p>
+          <h1 id="auth-title">Taller Mecanico</h1>
         </div>
+      </header>
+
+      <div class="auth-heading">
+        <h2>{{ mode === 'login' ? 'Acceso al sistema' : 'Registro de personal' }}</h2>
+        <p>{{ mode === 'login' ? 'Ingresa tus credenciales para continuar.' : 'Crea un acceso para Gerente o Recepcionista.' }}</p>
       </div>
 
-      <div class="security-copy">
-        <span>Seguridad</span>
-        <span>Autenticacion</span>
-        <span>Autorizacion</span>
-      </div>
+      <form v-if="mode === 'login'" class="auth-form" @submit.prevent="login">
+        <label class="form-label" for="username">Usuario</label>
+        <input id="username" v-model.trim="username" class="form-control" autocomplete="username" minlength="3" required />
 
-      <form v-if="mode === 'register'" class="auth-form" @submit.prevent="register">
-        <label class="form-label" for="register-name">Nombre completo</label>
-        <input id="register-name" v-model="name" class="form-control" type="text" autocomplete="name" required />
+        <label class="form-label" for="password">Contrasena</label>
+        <input id="password" v-model="password" class="form-control" type="password" autocomplete="current-password" minlength="8" required />
+
+        <label class="form-label" for="access-key">Palabra clave</label>
+        <input id="access-key" v-model="accessKey" class="form-control" type="password" autocomplete="off" minlength="8" required />
+
+        <button class="btn btn-danger w-100" type="submit" :disabled="loading">
+          {{ loading ? 'Validando acceso...' : 'Iniciar sesion' }}
+        </button>
+        <button class="link-button" type="button" @click="changeMode('register')">Registrar personal autorizado</button>
+      </form>
+
+      <form v-else class="auth-form" @submit.prevent="register">
+        <label class="form-label" for="register-username">Usuario</label>
+        <input id="register-username" v-model.trim="username" class="form-control" autocomplete="username" minlength="3" maxlength="60" required />
 
         <label class="form-label" for="register-email">Correo</label>
-        <input id="register-email" v-model="email" class="form-control" type="email" autocomplete="email" required />
+        <input id="register-email" v-model.trim="email" class="form-control" type="email" autocomplete="email" required />
+
+        <label class="form-label" for="register-role">Puesto</label>
+        <select id="register-role" v-model="role" class="form-select" required>
+          <option value="GERENTE">Gerente</option>
+          <option value="RECEPCIONISTA">Recepcionista</option>
+        </select>
+
+        <label class="form-label" for="register-key">Palabra clave</label>
+        <input id="register-key" v-model="accessKey" class="form-control" type="password" autocomplete="new-password" minlength="8" required />
 
         <label class="form-label" for="register-password">Contrasena</label>
         <input id="register-password" v-model="password" class="form-control" type="password" autocomplete="new-password" minlength="8" required />
@@ -170,72 +130,13 @@ async function resetPassword() {
         <input id="confirm-password" v-model="confirmPassword" class="form-control" type="password" autocomplete="new-password" minlength="8" required />
 
         <button class="btn btn-danger w-100" type="submit" :disabled="loading">
-          {{ loading ? 'Creando cuenta...' : 'Registrarme' }}
+          {{ loading ? 'Creando acceso...' : 'Crear acceso' }}
         </button>
-
-        <button class="link-button" type="button" @click="mode = 'login'">
-          Ya tengo cuenta
-        </button>
-      </form>
-
-      <form v-if="mode === 'login'" class="auth-form" @submit.prevent="login">
-        <label class="form-label" for="email">Correo</label>
-        <input id="email" v-model="email" class="form-control" type="email" autocomplete="email" required />
-
-        <label class="form-label" for="password">Contrasena</label>
-        <input id="password" v-model="password" class="form-control" type="password" autocomplete="current-password" required />
-
-        <button class="btn btn-danger w-100" type="submit" :disabled="loading">
-          {{ loading ? 'Entrando...' : 'Iniciar sesion' }}
-        </button>
-
-        <div class="auth-actions">
-          <button class="link-button" type="button" @click="mode = 'register'">
-            Crear cuenta
-          </button>
-          <button class="link-button" type="button" @click="mode = 'forgot'">
-            Recuperar contrasena
-          </button>
-        </div>
-      </form>
-
-      <form v-if="mode === 'forgot'" class="auth-form" @submit.prevent="requestResetCode">
-        <label class="form-label" for="forgot-email">Correo registrado</label>
-        <input id="forgot-email" v-model="email" class="form-control" type="email" autocomplete="email" required />
-
-        <button class="btn btn-danger w-100" type="submit" :disabled="loading">
-          {{ loading ? 'Generando...' : 'Generar codigo' }}
-        </button>
-
-        <button class="link-button" type="button" @click="mode = 'login'">
-          Volver al login
-        </button>
-      </form>
-
-      <form v-if="mode === 'reset'" class="auth-form" @submit.prevent="resetPassword">
-        <label class="form-label" for="reset-code">Codigo de recuperacion</label>
-        <input id="reset-code" v-model="code" class="form-control" inputmode="numeric" maxlength="6" required />
-
-        <label class="form-label" for="new-password">Nueva contrasena</label>
-        <input id="new-password" v-model="newPassword" class="form-control" type="password" autocomplete="new-password" required />
-
-        <button class="btn btn-danger w-100" type="submit" :disabled="loading">
-          {{ loading ? 'Actualizando...' : 'Cambiar contrasena' }}
-        </button>
+        <button class="link-button" type="button" @click="changeMode('login')">Volver al inicio de sesion</button>
       </form>
 
       <div v-if="error" class="alert alert-danger mt-3" role="alert">{{ error }}</div>
-      <div v-if="success" class="alert alert-light border mt-3" role="status">{{ success }}</div>
-      <div v-if="developmentResetCode" class="dev-code mt-3">
-        Codigo temporal de prueba: <strong>{{ developmentResetCode }}</strong>
-      </div>
-
-      <div class="demo-users">
-        <p>Usuarios demo</p>
-        <span>gerente@taller.com / Gerente123</span>
-        <span>mecanico@taller.com / Mecanico123</span>
-        <span>cliente@taller.com / Cliente123</span>
-      </div>
-    </div>
+      <div v-if="success" class="alert alert-success mt-3" role="status">{{ success }}</div>
+    </main>
   </section>
 </template>

@@ -1,5 +1,7 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import ClientRegistrationForm from './ClientRegistrationForm.vue'
+import RegisteredClientsView from './RegisteredClientsView.vue'
 
 const props = defineProps({
   user: {
@@ -13,9 +15,13 @@ defineEmits(['logout'])
 const roleMessage = computed(() => {
   const role = props.user.role
   if (role === 'GERENTE') return 'Acceso completo: usuarios, ordenes, reportes y permisos.'
+  if (role === 'RECEPCIONISTA') return 'Puedes registrar clientes y mantener actualizados sus datos de contacto.'
   if (role === 'MECANICO') return 'Puedes actualizar el estatus de los vehiculos asignados.'
   return 'Puedes consultar el estatus de tu vehiculo y el historial de servicio.'
 })
+
+const canRegisterClients = computed(() => ['GERENTE', 'RECEPCIONISTA'].includes(props.user.role))
+const clientsVersion = ref(0)
 
 const platformOptions = computed(() => {
   const shared = [
@@ -103,6 +109,9 @@ const platformOptions = computed(() => {
             <strong>3</strong>
           </article>
         </div>
+
+        <ClientRegistrationForm v-if="canRegisterClients" @registered="clientsVersion += 1" />
+        <RegisteredClientsView v-if="canRegisterClients" :key="clientsVersion" />
 
         <div class="section-heading">
           <div>

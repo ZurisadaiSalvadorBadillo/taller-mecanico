@@ -24,10 +24,8 @@ body {
   display: grid;
   place-items: center;
   padding: 24px;
-  background:
-    linear-gradient(135deg, rgba(215, 25, 32, 0.12), transparent 40%),
-    linear-gradient(315deg, rgba(8, 8, 8, 0.95), rgba(8, 8, 8, 0.78)),
-    var(--black);
+  background-color: var(--black);
+  background-image: repeating-linear-gradient(135deg, transparent 0, transparent 24px, rgba(215, 25, 32, 0.08) 24px, rgba(215, 25, 32, 0.08) 25px);
 }
 
 .auth-panel {
@@ -39,7 +37,7 @@ body {
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
 }
 
-.brand-strip,
+.auth-header,
 .brand-inline,
 .welcome-row {
   display: flex;
@@ -75,20 +73,21 @@ h1 {
   line-height: 1.15;
 }
 
-.security-copy {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 28px 0;
+.auth-heading {
+  margin: 30px 0 22px;
+  padding-top: 18px;
+  border-top: 1px solid #e7e7e7;
 }
 
-.security-copy span {
-  padding: 8px 10px;
-  border: 1px solid #e4e4e4;
-  border-radius: 8px;
-  background: var(--soft);
-  font-size: 0.9rem;
-  font-weight: 700;
+.auth-heading h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.auth-heading p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
 }
 
 .auth-form {
@@ -120,9 +119,10 @@ h1 {
 }
 
 .link-button {
+  padding: 7px 4px;
   border: 0;
   background: transparent;
-  color: var(--black);
+  color: var(--red-dark);
   font-weight: 700;
   text-decoration: underline;
 }
@@ -139,22 +139,6 @@ h1 {
   border-left: 4px solid var(--red);
   background: #fff5f5;
   border-radius: 8px;
-}
-
-.demo-users {
-  display: grid;
-  gap: 4px;
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 1px solid #eeeeee;
-  color: var(--muted);
-  font-size: 0.86rem;
-}
-
-.demo-users p {
-  margin: 0 0 4px;
-  color: var(--black);
-  font-weight: 800;
 }
 
 .dashboard-page {
@@ -314,6 +298,141 @@ h1 {
   margin-top: 10px;
 }
 
+.client-registration {
+  margin-top: 28px;
+  padding-top: 4px;
+}
+
+.registered-clients {
+  margin-top: 28px;
+}
+
+.clients-table {
+  margin-top: 16px;
+  border: 1px solid #ececec;
+  border-radius: 8px;
+}
+
+.client-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.client-detail-card {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #e5e5e5;
+  border-top: 3px solid var(--red);
+  border-radius: 8px;
+  background: var(--white);
+}
+
+.client-photo {
+  width: 116px;
+  height: 116px;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.client-detail-heading h3 {
+  margin: 4px 0 0;
+  font-size: 1.06rem;
+}
+
+.client-data {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.client-data div {
+  min-width: 0;
+}
+
+.client-data dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.client-data dd {
+  margin: 3px 0 0;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+}
+
+.client-data .client-address {
+  grid-column: 1 / -1;
+}
+
+.clients-table .table {
+  min-width: 720px;
+}
+
+.empty-clients {
+  margin: 16px 0 0;
+  padding: 18px;
+  border: 1px solid #ececec;
+  color: var(--muted);
+}
+
+.client-heading {
+  margin-top: 0;
+}
+
+.form-note {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.client-form {
+  display: grid;
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.form-section {
+  padding: 18px;
+  border: 1px solid #ececec;
+  border-radius: 8px;
+}
+
+.form-section h3 {
+  margin: 0 0 16px;
+  font-size: 1rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.form-grid label {
+  display: grid;
+  gap: 7px;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.form-grid input[type="file"] {
+  padding: 9px;
+}
+
+.register-client-button {
+  justify-self: start;
+  min-width: 190px;
+}
+
 .orders-table .table {
   margin: 14px 0 0;
   min-width: 680px;
@@ -361,6 +480,15 @@ h1 {
   }
 
   .module-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .client-detail-grid,
+  .client-data {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid {
     grid-template-columns: 1fr;
   }
 
