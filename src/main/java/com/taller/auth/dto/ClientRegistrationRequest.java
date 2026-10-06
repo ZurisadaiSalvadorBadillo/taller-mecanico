@@ -25,6 +25,7 @@ public class ClientRegistrationRequest {
     @NotBlank @Size(max = 120) private String municipality;
     @NotBlank @Size(max = 120) private String state;
     @NotBlank @Pattern(regexp = "^\\d{5}$", message = "El codigo postal debe tener 5 digitos") private String postalCode;
+    @NotNull(message = "Selecciona el taller al que pertenece el cliente") private Long workshopId;
 
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
@@ -52,4 +53,6 @@ public class ClientRegistrationRequest {
     public void setState(String state) { this.state = state; }
     public String getPostalCode() { return postalCode; }
     public void setPostalCode(String postalCode) { this.postalCode = postalCode; }
+    public Long getWorkshopId() { return workshopId; }
+    public void setWorkshopId(Long workshopId) { this.workshopId = workshopId; }
 }

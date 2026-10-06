@@ -5,6 +5,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -58,6 +61,13 @@ public class Client {
     @Column(nullable = false, length = 10)
     private String postalCode;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "taller_id", nullable = false)
+    private Workshop workshop;
+
+    @Column(nullable = false, length = 20)
+    private String status;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -76,6 +86,8 @@ public class Client {
     public String getMunicipality() { return municipality; }
     public String getState() { return state; }
     public String getPostalCode() { return postalCode; }
+    public Workshop getWorkshop() { return workshop; }
+    public String getStatus() { return status; }
     public void setFullName(String fullName) { this.fullName = fullName; }
     public void setAlternateContactName(String alternateContactName) { this.alternateContactName = alternateContactName; }
     public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
@@ -90,5 +102,7 @@ public class Client {
     public void setMunicipality(String municipality) { this.municipality = municipality; }
     public void setState(String state) { this.state = state; }
     public void setPostalCode(String postalCode) { this.postalCode = postalCode; }
+    public void setWorkshop(Workshop workshop) { this.workshop = workshop; }
+    public void setStatus(String status) { this.status = status; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

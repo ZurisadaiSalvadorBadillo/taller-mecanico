@@ -14,6 +14,9 @@ public record ClientSummaryResponse(
         String municipality,
         String state,
         String postalCode,
+        Long workshopId,
+        String workshopName,
+        String status,
         String photoUrl
 ) {
 }

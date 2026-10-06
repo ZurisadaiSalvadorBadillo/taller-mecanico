@@ -2,6 +2,7 @@ package com.taller.auth.controller;
 
 import com.taller.auth.dto.MessageResponse;
 import com.taller.auth.service.DuplicateClientException;
+import com.taller.auth.service.DuplicateWorkshopException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,11 @@ public class ApiExceptionHandler {
     public ResponseEntity<MessageResponse> handleDuplicateClient() {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new MessageResponse("Ya existe un cliente con datos de contacto registrados."));
+    }
+
+    @ExceptionHandler(DuplicateWorkshopException.class)
+    public ResponseEntity<MessageResponse> handleDuplicateWorkshop(DuplicateWorkshopException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new MessageResponse(exception.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
