@@ -1,7 +1,8 @@
 <script setup>
 import { computed, ref } from 'vue'
 import ClientRegistrationForm from './ClientRegistrationForm.vue'
-import RegisteredClientsView from './RegisteredClientsView.vue'
+import ClientManagementView from './ClientManagementView.vue'
+import WorkshopRegistrationForm from './WorkshopRegistrationForm.vue'
 
 const props = defineProps({
   user: {
@@ -22,6 +23,8 @@ const roleMessage = computed(() => {
 
 const canRegisterClients = computed(() => ['GERENTE', 'RECEPCIONISTA'].includes(props.user.role))
 const clientsVersion = ref(0)
+const workshopsVersion = ref(0)
+const activeView = ref('workshops')
 
 const platformOptions = computed(() => {
   const shared = [
@@ -79,10 +82,8 @@ const platformOptions = computed(() => {
 
     <div class="dashboard-shell">
       <aside class="sidebar">
-        <button class="nav-button active" type="button">Ordenes</button>
-        <button class="nav-button" type="button">Vehiculos</button>
-        <button class="nav-button" type="button">Usuarios</button>
-        <button class="nav-button" type="button">Reportes</button>
+        <button v-if="canRegisterClients" class="nav-button" :class="{ active: activeView === 'workshops' }" type="button" @click="activeView = 'workshops'">Registro de talleres</button>
+        <button v-if="canRegisterClients" class="nav-button" :class="{ active: activeView === 'clients' }" type="button" @click="activeView = 'clients'">Gestion de clientes</button>
       </aside>
 
       <section class="workspace">
@@ -110,8 +111,11 @@ const platformOptions = computed(() => {
           </article>
         </div>
 
-        <ClientRegistrationForm v-if="canRegisterClients" @registered="clientsVersion += 1" />
-        <RegisteredClientsView v-if="canRegisterClients" :key="clientsVersion" />
+        <WorkshopRegistrationForm v-if="canRegisterClients && activeView === 'workshops'" @registered="workshopsVersion += 1" />
+        <template v-if="canRegisterClients && activeView === 'clients'">
+          <ClientRegistrationForm :key="workshopsVersion" @registered="clientsVersion += 1" />
+          <ClientManagementView :key="`${workshopsVersion}-${clientsVersion}`" />
+        </template>
 
         <div class="section-heading">
           <div>

@@ -1,0 +1,48 @@
+flowchart LR
+  subgraph Frontend[Frontend Vue.js]
+    Menu[DashboardView - Menu lateral]
+    TallerForm[WorkshopRegistrationForm]
+    ClienteForm[ClientRegistrationForm]
+    ClienteGestion[ClientManagementView]
+    ApiClient[services/api.js - JWT]
+    Menu --> TallerForm
+    Menu --> ClienteForm
+    Menu --> ClienteGestion
+    TallerForm --> ApiClient
+    ClienteForm --> ApiClient
+    ClienteGestion --> ApiClient
+  end
+
+  subgraph Seguridad[Spring Security]
+    Jwt[JwtAuthenticationFilter]
+    Rbac[SecurityConfig + @PreAuthorize]
+    Jwt --> Rbac
+  end
+
+  subgraph Api[API Spring Boot]
+    WorkshopApi[WorkshopController\nPOST/GET /api/workshops]
+    ClientApi[ClientController\nPOST/GET/PUT/PATCH /api/clients]
+    WorkshopFacade[WorkshopRegistrationFacade]
+    ClientFacade[ClientRegistrationFacade]
+  end
+
+  subgraph Datos[Persistencia]
+    WorkshopRepo[WorkshopRepository]
+    ClientRepo[ClientRepository]
+    WorkshopEntity[(talleres)]
+    ClientEntity[(clientes\ntaller_id, status)]
+    WorkshopPhotos[(uploads/talleres)]
+    ClientPhotos[(uploads/clientes)]
+  end
+
+  ApiClient --> Jwt
+  Rbac --> WorkshopApi
+  Rbac --> ClientApi
+  WorkshopApi --> WorkshopFacade --> WorkshopRepo --> WorkshopEntity
+  WorkshopFacade --> WorkshopPhotos
+  ClientApi --> ClientFacade --> ClientRepo --> ClientEntity
+  ClientFacade --> WorkshopRepo
+  ClientFacade --> ClientPhotos
+
+  Rbac -. GERENTE o RECEPCIONISTA .-> WorkshopApi
+  Rbac -. GERENTE o RECEPCIONISTA: suspension .-> ClientApi
