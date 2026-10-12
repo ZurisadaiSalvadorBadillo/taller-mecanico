@@ -61,12 +61,27 @@ public class Client {
     @Column(nullable = false, length = 10)
     private String postalCode;
 
+    @Column(nullable = false, length = 80) private String firstName;
+    @Column(nullable = false, length = 80) private String paternalSurname;
+    @Column(nullable = false, length = 80) private String maternalSurname;
+    @Column(nullable = false, unique = true, length = 18) private String curp;
+    @Column(nullable = false, unique = true, length = 13) private String rfc;
+    @Column(nullable = false) private Integer age;
+    @Column(nullable = false, length = 160) private String contactEmail;
+    @Column(nullable = false, length = 25) private String contactMobile;
+    @Column(nullable = false, length = 25) private String personalMobile;
+    @Column(nullable = false, length = 120) private String locality;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "taller_id", nullable = false)
     private Workshop workshop;
 
     @Column(nullable = false, length = 20)
     private String status;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "status_usuario_id", nullable = false)
+    private UserStatus userStatus;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
@@ -86,8 +101,19 @@ public class Client {
     public String getMunicipality() { return municipality; }
     public String getState() { return state; }
     public String getPostalCode() { return postalCode; }
+    public String getFirstName() { return firstName; }
+    public String getPaternalSurname() { return paternalSurname; }
+    public String getMaternalSurname() { return maternalSurname; }
+    public String getCurp() { return curp; }
+    public String getRfc() { return rfc; }
+    public Integer getAge() { return age; }
+    public String getContactEmail() { return contactEmail; }
+    public String getContactMobile() { return contactMobile; }
+    public String getPersonalMobile() { return personalMobile; }
+    public String getLocality() { return locality; }
     public Workshop getWorkshop() { return workshop; }
     public String getStatus() { return status; }
+    public UserStatus getUserStatus() { return userStatus; }
     public void setFullName(String fullName) { this.fullName = fullName; }
     public void setAlternateContactName(String alternateContactName) { this.alternateContactName = alternateContactName; }
     public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
@@ -102,7 +128,18 @@ public class Client {
     public void setMunicipality(String municipality) { this.municipality = municipality; }
     public void setState(String state) { this.state = state; }
     public void setPostalCode(String postalCode) { this.postalCode = postalCode; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
+    public void setPaternalSurname(String paternalSurname) { this.paternalSurname = paternalSurname; }
+    public void setMaternalSurname(String maternalSurname) { this.maternalSurname = maternalSurname; }
+    public void setCurp(String curp) { this.curp = curp; }
+    public void setRfc(String rfc) { this.rfc = rfc; }
+    public void setAge(Integer age) { this.age = age; }
+    public void setContactEmail(String contactEmail) { this.contactEmail = contactEmail; }
+    public void setContactMobile(String contactMobile) { this.contactMobile = contactMobile; }
+    public void setPersonalMobile(String personalMobile) { this.personalMobile = personalMobile; }
+    public void setLocality(String locality) { this.locality = locality; }
     public void setWorkshop(Workshop workshop) { this.workshop = workshop; }
     public void setStatus(String status) { this.status = status; }
+    public void setUserStatus(UserStatus userStatus) { this.userStatus = userStatus; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

@@ -25,8 +25,8 @@ public class UserService {
         if (!request.password().equals(request.confirmPassword())) {
             throw new IllegalArgumentException("La confirmacion de contrasena no coincide.");
         }
-        if (request.role() != Role.GERENTE && request.role() != Role.RECEPCIONISTA) {
-            throw new IllegalArgumentException("Solo se permiten los puestos Gerente o Recepcionista.");
+        if (request.role() != Role.ADMINISTRADOR && request.role() != Role.SECRETARIA) {
+            throw new IllegalArgumentException("Solo se permiten los puestos Administrador o Secretaria.");
         }
         if (userRepository.existsByUsername(request.username())) {
             throw new IllegalArgumentException("El usuario ya esta registrado");

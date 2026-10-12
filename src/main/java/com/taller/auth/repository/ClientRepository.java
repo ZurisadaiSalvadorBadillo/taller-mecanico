@@ -39,4 +39,15 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
             String personalPhone,
             String workPhone
     );
+
+    boolean existsByFirstNameIgnoreCaseAndPaternalSurnameIgnoreCaseAndMaternalSurnameIgnoreCase(
+            String firstName, String paternalSurname, String maternalSurname);
+
+    @Query("""
+            select count(client) > 0 from Client client where client.id <> :clientId
+            and lower(client.firstName) = lower(:firstName)
+            and lower(client.paternalSurname) = lower(:paternalSurname)
+            and lower(client.maternalSurname) = lower(:maternalSurname)
+            """)
+    boolean existsByFullNameExcludingClient(Long clientId, String firstName, String paternalSurname, String maternalSurname);
 }

@@ -37,6 +37,7 @@ public class WorkshopRegistrationFacade {
             workshop.setPostalCode(request.getPostalCode());
             workshop.setMunicipality(request.getMunicipality().trim());
             workshop.setNeighborhood(request.getNeighborhood().trim());
+            workshop.setLocality(request.getLocality().trim());
             workshop.setStreet(request.getStreet().trim());
             workshop.setBusinessName(request.getBusinessName().trim());
             workshop.setPhone(request.getPhone().replaceAll("[^0-9+]", ""));

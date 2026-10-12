@@ -16,6 +16,7 @@ public class WorkshopRegistrationRequest {
     @NotBlank @Pattern(regexp = "^\\d{5}$", message = "El codigo postal debe tener 5 digitos") private String postalCode;
     @NotBlank @Size(max = 120) private String municipality;
     @NotBlank @Size(max = 120) private String neighborhood;
+    @NotBlank @Size(max = 120) private String locality;
     @NotBlank @Size(max = 160) private String street;
     @NotBlank @Size(max = 180) private String businessName;
     @NotBlank @Pattern(regexp = PHONE_PATTERN, message = "El telefono tiene un formato invalido") private String phone;
@@ -33,6 +34,8 @@ public class WorkshopRegistrationRequest {
     public void setMunicipality(String municipality) { this.municipality = municipality; }
     public String getNeighborhood() { return neighborhood; }
     public void setNeighborhood(String neighborhood) { this.neighborhood = neighborhood; }
+    public String getLocality() { return locality; }
+    public void setLocality(String locality) { this.locality = locality; }
     public String getStreet() { return street; }
     public void setStreet(String street) { this.street = street; }
     public String getBusinessName() { return businessName; }

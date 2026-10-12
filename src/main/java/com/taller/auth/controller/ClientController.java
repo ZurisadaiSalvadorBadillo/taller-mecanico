@@ -36,13 +36,13 @@ public class ClientController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('GERENTE', 'RECEPCIONISTA')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SECRETARIA')")
     public ResponseEntity<ClientRegistrationResponse> register(@Valid @ModelAttribute ClientRegistrationRequest request) {
         return ResponseEntity.ok(clientRegistrationFacade.register(request));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('GERENTE', 'RECEPCIONISTA')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SECRETARIA')")
     public ResponseEntity<Page<ClientSummaryResponse>> list(
             @RequestParam Long workshopId,
             @RequestParam(defaultValue = "0") @Min(0) int page,
@@ -55,7 +55,7 @@ public class ClientController {
     }
 
     @PutMapping(value = "/{clientId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('GERENTE', 'RECEPCIONISTA')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SECRETARIA')")
     public ResponseEntity<ClientSummaryResponse> update(
             @PathVariable Long clientId,
             @Valid @ModelAttribute ClientUpdateRequest request
@@ -64,13 +64,13 @@ public class ClientController {
     }
 
     @PatchMapping("/{clientId}/suspension")
-    @PreAuthorize("hasAnyRole('GERENTE', 'RECEPCIONISTA')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<ClientSummaryResponse> suspend(@PathVariable Long clientId) {
         return ResponseEntity.ok(clientRegistrationFacade.suspend(clientId));
     }
 
     @GetMapping("/{clientId}/photo")
-    @PreAuthorize("hasAnyRole('GERENTE', 'RECEPCIONISTA')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SECRETARIA')")
     public ResponseEntity<Resource> photo(@PathVariable Long clientId) {
         var photo = clientRegistrationFacade.getPhoto(clientId);
         return ResponseEntity.ok()

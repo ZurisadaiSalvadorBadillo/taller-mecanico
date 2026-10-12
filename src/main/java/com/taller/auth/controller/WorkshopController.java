@@ -24,13 +24,13 @@ public class WorkshopController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('GERENTE', 'RECEPCIONISTA')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SECRETARIA')")
     public ResponseEntity<WorkshopSummaryResponse> register(@Valid @ModelAttribute WorkshopRegistrationRequest request) {
         return ResponseEntity.ok(workshopRegistrationFacade.register(request));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('GERENTE', 'RECEPCIONISTA')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SECRETARIA')")
     public ResponseEntity<List<WorkshopSummaryResponse>> list() {
         return ResponseEntity.ok(workshopRegistrationFacade.list());
     }

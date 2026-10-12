@@ -30,6 +30,9 @@ public class Workshop {
     @Column(nullable = false, length = 120)
     private String neighborhood;
 
+    @Column(nullable = false, length = 120)
+    private String locality;
+
     @Column(nullable = false, length = 160)
     private String street;
 
@@ -60,6 +63,7 @@ public class Workshop {
     public String getPostalCode() { return postalCode; }
     public String getMunicipality() { return municipality; }
     public String getNeighborhood() { return neighborhood; }
+    public String getLocality() { return locality; }
     public String getStreet() { return street; }
     public String getBusinessName() { return businessName; }
     public String getPhone() { return phone; }
@@ -73,6 +77,7 @@ public class Workshop {
     public void setPostalCode(String postalCode) { this.postalCode = postalCode; }
     public void setMunicipality(String municipality) { this.municipality = municipality; }
     public void setNeighborhood(String neighborhood) { this.neighborhood = neighborhood; }
+    public void setLocality(String locality) { this.locality = locality; }
     public void setStreet(String street) { this.street = street; }
     public void setBusinessName(String businessName) { this.businessName = businessName; }
     public void setPhone(String phone) { this.phone = phone; }
