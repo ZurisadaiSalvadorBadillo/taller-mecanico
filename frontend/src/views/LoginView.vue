@@ -7,7 +7,7 @@ const emit = defineEmits(['logged-in'])
 const mode = ref('login')
 const username = ref('')
 const email = ref('')
-const role = ref('RECEPCIONISTA')
+const role = ref('SECRETARIA')
 const password = ref('')
 const confirmPassword = ref('')
 const accessKey = ref('')
@@ -116,8 +116,8 @@ async function register() {
 
         <label class="form-label" for="register-role">Puesto</label>
         <select id="register-role" v-model="role" class="form-select" required>
-          <option value="GERENTE">Gerente</option>
-          <option value="RECEPCIONISTA">Recepcionista</option>
+          <option value="ADMINISTRADOR">Administrador</option>
+          <option value="SECRETARIA">Secretaria</option>
         </select>
 
         <label class="form-label" for="register-key">Palabra clave</label>

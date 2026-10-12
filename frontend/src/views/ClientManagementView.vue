@@ -1,204 +1,27 @@
 <script setup>
-import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import api from '../services/api'
-
-const workshops = ref([])
-const clients = ref([])
-const selectedWorkshopId = ref('')
-const page = ref(0)
-const totalPages = ref(0)
-const totalElements = ref(0)
-const pageSize = ref(10)
-const sortDirection = ref('ASC')
-const loading = ref(false)
-const error = ref('')
-const success = ref('')
-const editingId = ref(null)
-const editPhoto = ref(null)
-const editForm = reactive(emptyEditForm())
-
-function emptyEditForm() {
-  return {
-    fullName: '', alternateContactName: '', birthDate: '', personalPhone: '', workPhone: '', personalEmail: '', workEmail: '',
-    street: '', neighborhood: '', municipality: '', state: '', postalCode: '', workshopId: ''
-  }
-}
-
-function clearPhotoPreviews() {
-  clients.value.forEach((client) => client.photoPreview && URL.revokeObjectURL(client.photoPreview))
-}
-
-async function loadWorkshops() {
-  try {
-    const { data } = await api.get('/workshops')
-    workshops.value = data
-    if (!selectedWorkshopId.value && data.length) selectedWorkshopId.value = data[0].id
-  } catch (requestError) {
-    error.value = requestError.response?.data?.message || 'No fue posible cargar los talleres.'
-  }
-}
-
-async function loadClients() {
-  if (!selectedWorkshopId.value) {
-    clients.value = []
-    return
-  }
-  loading.value = true
-  error.value = ''
-  success.value = ''
-  clearPhotoPreviews()
-  try {
-    const { data } = await api.get('/clients', {
-      params: { workshopId: selectedWorkshopId.value, page: page.value, size: pageSize.value, sortDirection: sortDirection.value }
-    })
-    totalPages.value = data.totalPages
-    totalElements.value = data.totalElements
-    clients.value = await Promise.all(data.content.map(async (client) => {
-      const photo = await api.get(client.photoUrl, { responseType: 'blob' })
-      return { ...client, photoPreview: URL.createObjectURL(photo.data) }
-    }))
-  } catch (requestError) {
-    error.value = requestError.response?.data?.message || 'No fue posible cargar los clientes.'
-  } finally {
-    loading.value = false
-  }
-}
-
-function changeFilter() {
-  page.value = 0
-  loadClients()
-}
-
-function changePage(nextPage) {
-  page.value = nextPage
-  loadClients()
-}
-
-function startEdit(client) {
-  editingId.value = client.id
-  editPhoto.value = null
-  Object.assign(editForm, {
-    fullName: client.fullName, alternateContactName: client.alternateContactName, birthDate: client.birthDate,
-    personalPhone: client.personalPhone, workPhone: client.workPhone, personalEmail: client.personalEmail,
-    workEmail: client.workEmail, street: client.street, neighborhood: client.neighborhood, municipality: client.municipality,
-    state: client.state, postalCode: client.postalCode, workshopId: client.workshopId
-  })
-}
-
-function cancelEdit() {
-  editingId.value = null
-  editPhoto.value = null
-  Object.assign(editForm, emptyEditForm())
-}
-
-function onEditPhotoChange(event) {
-  const selected = event.target.files?.[0] || null
-  if (selected && selected.size > 7 * 1024 * 1024) {
-    event.target.value = ''
-    editPhoto.value = null
-    error.value = 'La fotografia del cliente no puede superar 7 MB.'
-    return
-  }
-  editPhoto.value = selected
-}
-
-async function saveEdit() {
-  error.value = ''
-  const payload = new FormData()
-  Object.entries(editForm).forEach(([key, value]) => payload.append(key, value))
-  if (editPhoto.value) payload.append('photo', editPhoto.value)
-  try {
-    await api.put(`/clients/${editingId.value}`, payload, { headers: { 'Content-Type': 'multipart/form-data' } })
-    success.value = 'Cliente actualizado correctamente.'
-    cancelEdit()
-    page.value = 0
-    await loadClients()
-  } catch (requestError) {
-    error.value = requestError.response?.data?.message || 'No fue posible actualizar el cliente.'
-  }
-}
-
-async function suspendClient(client) {
-  if (client.status === 'SUSPENDIDO' || !window.confirm(`Suspender a ${client.fullName}?`)) return
-  error.value = ''
-  try {
-    await api.patch(`/clients/${client.id}/suspension`)
-    success.value = 'Cliente suspendido correctamente.'
-    await loadClients()
-  } catch (requestError) {
-    error.value = requestError.response?.data?.message || 'No fue posible suspender el cliente.'
-  }
-}
-
-onMounted(async () => {
-  await loadWorkshops()
-  await loadClients()
-})
-onBeforeUnmount(clearPhotoPreviews)
+const props = defineProps({ role: { type: String, required: true } })
+const workshops = ref([]), clients = ref([]), workshopId = ref(''), page = ref(0), totalPages = ref(0), totalElements = ref(0), pageSize = ref(10), sortDirection = ref('ASC'), loading = ref(false), error = ref(''), success = ref(''), editingId = ref(null), selectedClient = ref(null), brands = ref([]), models = ref([]), vehicles = ref([])
+const edit = reactive(emptyClient()), vehicle = reactive({ vin: '', plate: '', brand: '', model: '', year: new Date().getFullYear(), version: '', mileage: '', serialNumber: '' })
+function emptyClient() { return { firstName: '', paternalSurname: '', maternalSurname: '', curp: '', rfc: '', birthDate: '', age: '', contactEmail: '', contactMobile: '', personalMobile: '', workPhone: '', street: '', locality: '', municipality: '', state: '', postalCode: '', workshopId: '' } }
+async function loadWorkshops() { try { workshops.value = (await api.get('/workshops')).data; if (!workshopId.value && workshops.value.length) workshopId.value = workshops.value[0].id } catch { error.value = 'No fue posible cargar talleres.' } }
+async function loadClients() { if (!workshopId.value) return; loading.value = true; error.value = ''; try { const { data } = await api.get('/clients', { params: { workshopId: workshopId.value, page: page.value, size: pageSize.value, sortDirection: sortDirection.value } }); totalPages.value = data.totalPages; totalElements.value = data.totalElements; clients.value = data.content } catch (e) { error.value = e.response?.data?.message || 'No fue posible cargar clientes.' } finally { loading.value = false } }
+function filter() { page.value = 0; loadClients() }
+function startEdit(client) { editingId.value = client.id; Object.assign(edit, client) }
+async function saveEdit() { const payload = new FormData(); Object.entries(edit).forEach(([key, value]) => payload.append(key, value)); const input = document.getElementById('edit-client-photo'); if (input?.files[0]) payload.append('photo', input.files[0]); else { error.value = 'Selecciona la fotografia para actualizar el cliente.'; return } try { await api.put(`/clients/${editingId.value}`, payload, { headers: { 'Content-Type': 'multipart/form-data' } }); success.value = 'Cliente actualizado.'; editingId.value = null; loadClients() } catch (e) { error.value = e.response?.data?.message || 'No fue posible actualizar.' } }
+async function suspend(client) { if (props.role !== 'ADMINISTRADOR') return; if (client.status === 'SUSPENDIDO') { error.value = 'El cliente ya se encuentra suspendido.'; return } if (!window.confirm(`Suspender a ${client.fullName}?`)) return; try { await api.patch(`/clients/${client.id}/suspension`); success.value = 'Cliente suspendido.'; loadClients() } catch (e) { error.value = e.response?.data?.message || 'No fue posible suspender.' } }
+async function loadBrands() { try { const data = await fetch('https://vpic.nhtsa.dot.gov/api/vehicles/GetAllMakes?format=json').then((r) => r.json()); brands.value = data.Results.map((item) => item.Make_Name).sort() } catch { error.value = 'No fue posible cargar las marcas oficiales.' } }
+async function loadModels() { models.value = []; vehicle.model = ''; if (!vehicle.brand) return; try { const data = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMake/${encodeURIComponent(vehicle.brand)}?format=json`).then((r) => r.json()); models.value = [...new Set(data.Results.map((item) => item.Model_Name))].sort() } catch { error.value = 'No fue posible cargar modelos oficiales.' } }
+async function openVehicles(client) { if (client.status !== 'ACTIVO') { error.value = 'Solo los clientes activos pueden administrar vehiculos.'; return } selectedClient.value = client; Object.assign(vehicle, { vin: '', plate: '', brand: '', model: '', year: new Date().getFullYear(), version: '', mileage: '', serialNumber: '' }); await loadBrands(); vehicles.value = (await api.get(`/clients/${client.id}/vehicles`)).data }
+async function addVehicle() { vehicle.vin = vehicle.vin.toUpperCase(); vehicle.plate = vehicle.plate.toUpperCase(); if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(vehicle.vin)) { error.value = 'El VIN debe tener 17 caracteres validos.'; return } try { await api.post(`/clients/${selectedClient.value.id}/vehicles`, vehicle); vehicles.value = (await api.get(`/clients/${selectedClient.value.id}/vehicles`)).data; success.value = 'Vehiculo asociado correctamente.' } catch (e) { error.value = e.response?.data?.message || 'No fue posible asociar el vehiculo.' } }
+onMounted(async () => { await loadWorkshops(); await loadClients() })
 </script>
-
-<template>
-  <section class="registered-clients" aria-labelledby="registered-clients-title">
-    <div class="section-heading client-heading">
-      <div><p class="eyebrow">Consulta por taller</p><h2 id="registered-clients-title">Gestion de clientes</h2></div>
-      <button class="btn btn-outline-dark btn-sm" type="button" :disabled="loading" @click="loadClients">Actualizar</button>
-    </div>
-    <div class="client-filters">
-      <label>Taller
-        <select v-model="selectedWorkshopId" class="form-select" @change="changeFilter">
-          <option value="" disabled>Selecciona un taller</option>
-          <option v-for="workshop in workshops" :key="workshop.id" :value="workshop.id">{{ workshop.name }}</option>
-        </select>
-      </label>
-      <label>Registros por pagina
-        <select v-model.number="pageSize" class="form-select" @change="changeFilter"><option :value="5">5</option><option :value="10">10</option></select>
-      </label>
-      <label>Orden
-        <select v-model="sortDirection" class="form-select" @change="changeFilter"><option value="ASC">Ascendente</option><option value="DESC">Descendente</option></select>
-      </label>
-    </div>
-    <div v-if="error" class="alert alert-danger mt-3 mb-0" role="alert">{{ error }}</div>
-    <div v-if="success" class="alert alert-success mt-3 mb-0" role="status">{{ success }}</div>
-    <p v-if="loading" class="empty-clients">Cargando clientes...</p>
-    <p v-else-if="!selectedWorkshopId" class="empty-clients">Selecciona un taller para consultar sus clientes.</p>
-    <p v-else-if="clients.length === 0" class="empty-clients">No hay clientes en el taller seleccionado.</p>
-    <div v-else class="client-detail-grid">
-      <article v-for="client in clients" :key="client.id" class="client-detail-card">
-        <img class="client-photo" :src="client.photoPreview" :alt="`Fotografia de ${client.fullName}`" />
-        <div class="client-detail-heading"><p class="eyebrow">Folio #CL-{{ client.id }}</p><h3>{{ client.fullName }}</h3><span class="client-status" :class="{ suspended: client.status === 'SUSPENDIDO' }">{{ client.status }}</span></div>
-        <dl class="client-data">
-          <div><dt>Taller</dt><dd>{{ client.workshopName }}</dd></div>
-          <div><dt>Contacto alternativo</dt><dd>{{ client.alternateContactName }}</dd></div>
-          <div><dt>Fecha de nacimiento</dt><dd>{{ client.birthDate }}</dd></div>
-          <div><dt>Telefono personal</dt><dd>{{ client.personalPhone }}</dd></div>
-          <div><dt>Telefono de trabajo</dt><dd>{{ client.workPhone }}</dd></div>
-          <div><dt>Gmail personal</dt><dd>{{ client.personalEmail }}</dd></div>
-          <div><dt>Gmail del trabajo</dt><dd>{{ client.workEmail }}</dd></div>
-          <div class="client-address"><dt>Direccion</dt><dd>{{ client.street }}, {{ client.neighborhood }}, {{ client.municipality }}, {{ client.state }}, CP {{ client.postalCode }}</dd></div>
-        </dl>
-        <div class="client-actions"><button class="btn btn-outline-dark btn-sm" type="button" @click="startEdit(client)">Editar</button><button class="btn btn-danger btn-sm" type="button" :disabled="client.status === 'SUSPENDIDO'" @click="suspendClient(client)">Suspender</button></div>
-      </article>
-    </div>
-    <div v-if="totalPages > 1" class="pagination-bar"><span>{{ totalElements }} clientes</span><button class="btn btn-outline-dark btn-sm" :disabled="page === 0 || loading" @click="changePage(page - 1)">Anterior</button><span>Pagina {{ page + 1 }} de {{ totalPages }}</span><button class="btn btn-outline-dark btn-sm" :disabled="page + 1 >= totalPages || loading" @click="changePage(page + 1)">Siguiente</button></div>
-    <form v-if="editingId" class="client-form edit-client-form" @submit.prevent="saveEdit">
-      <div class="section-heading client-heading"><div><p class="eyebrow">Edicion</p><h2>Actualizar cliente</h2></div><button class="btn btn-outline-dark btn-sm" type="button" @click="cancelEdit">Cancelar</button></div>
-      <div class="form-section"><div class="form-grid">
-        <label>Nombre completo<input v-model.trim="editForm.fullName" class="form-control" required /></label>
-        <label>Contacto alternativo<input v-model.trim="editForm.alternateContactName" class="form-control" required /></label>
-        <label>Fecha de nacimiento<input v-model="editForm.birthDate" class="form-control" type="date" required /></label>
-        <label>Taller<select v-model="editForm.workshopId" class="form-select" required><option v-for="workshop in workshops" :key="workshop.id" :value="workshop.id">{{ workshop.name }}</option></select></label>
-        <label>Telefono personal<input v-model.trim="editForm.personalPhone" class="form-control" required /></label>
-        <label>Telefono de trabajo<input v-model.trim="editForm.workPhone" class="form-control" required /></label>
-        <label>Gmail personal<input v-model.trim="editForm.personalEmail" class="form-control" type="email" required /></label>
-        <label>Gmail del trabajo<input v-model.trim="editForm.workEmail" class="form-control" type="email" required /></label>
-        <label>Fotografia nueva (opcional)<input class="form-control" type="file" accept="image/*" @change="onEditPhotoChange" /></label>
-        <label>Calle<input v-model.trim="editForm.street" class="form-control" required /></label>
-        <label>Colonia<input v-model.trim="editForm.neighborhood" class="form-control" required /></label>
-        <label>Municipio<input v-model.trim="editForm.municipality" class="form-control" required /></label>
-        <label>Estado<input v-model.trim="editForm.state" class="form-control" required /></label>
-        <label>Codigo postal<input v-model.trim="editForm.postalCode" class="form-control" pattern="[0-9]{5}" maxlength="5" required /></label>
-      </div></div>
-      <button class="btn btn-danger register-client-button" type="submit">Guardar cambios</button>
-    </form>
-  </section>
-</template>
+<template><section class="registered-clients"><div class="section-heading client-heading"><div><p class="eyebrow">Consulta por taller</p><h2>Gestion de clientes</h2></div><button class="btn btn-outline-dark btn-sm" @click="loadClients">Actualizar</button></div>
+  <div class="client-filters"><label>Taller<select v-model="workshopId" class="form-select" @change="filter"><option v-for="workshop in workshops" :key="workshop.id" :value="workshop.id">{{ workshop.name }}</option></select></label><label>Por pagina<select v-model.number="pageSize" class="form-select" @change="filter"><option :value="5">5</option><option :value="10">10</option></select></label><label>Orden<select v-model="sortDirection" class="form-select" @change="filter"><option value="ASC">Ascendente</option><option value="DESC">Descendente</option></select></label></div>
+  <div v-if="error" class="alert alert-danger mt-3">{{ error }}</div><div v-if="success" class="alert alert-success mt-3">{{ success }}</div><p v-if="loading" class="empty-clients">Cargando...</p>
+  <div v-else class="client-detail-grid"><article v-for="client in clients" :key="client.id" class="client-detail-card"><div class="client-detail-heading"><p class="eyebrow">#CL-{{ client.id }}</p><h3>{{ client.fullName }}</h3><span class="client-status" :class="{ suspended: client.status !== 'ACTIVO' }">{{ client.status }}</span></div><dl class="client-data"><div><dt>CURP / RFC</dt><dd>{{ client.curp }} / {{ client.rfc }}</dd></div><div><dt>Taller</dt><dd>{{ client.workshopName }}</dd></div><div><dt>Contacto</dt><dd>{{ client.contactEmail }}<br>{{ client.contactMobile }}</dd></div><div><dt>Telefonos</dt><dd>{{ client.personalMobile }} / {{ client.workPhone }}</dd></div><div class="client-address"><dt>Direccion</dt><dd>{{ client.street }}, {{ client.locality }}, {{ client.municipality }}, {{ client.state }}, {{ client.postalCode }}</dd></div></dl><div class="client-actions"><button class="btn btn-outline-dark btn-sm" @click="startEdit(client)">Editar</button><button class="btn btn-outline-dark btn-sm" :disabled="client.status !== 'ACTIVO'" @click="openVehicles(client)">Vehiculos</button><button v-if="role === 'ADMINISTRADOR'" class="btn btn-danger btn-sm" :disabled="client.status === 'SUSPENDIDO'" @click="suspend(client)">Suspender</button></div></article></div>
+  <div v-if="totalPages > 1" class="pagination-bar"><span>{{ totalElements }} clientes</span><button class="btn btn-outline-dark btn-sm" :disabled="page === 0" @click="page--; loadClients()">Anterior</button><span>Pagina {{ page + 1 }} de {{ totalPages }}</span><button class="btn btn-outline-dark btn-sm" :disabled="page + 1 >= totalPages" @click="page++; loadClients()">Siguiente</button></div>
+  <form v-if="editingId" class="client-form edit-client-form" @submit.prevent="saveEdit"><div class="section-heading client-heading"><h2>Editar cliente</h2><button class="btn btn-outline-dark btn-sm" type="button" @click="editingId = null">Cancelar</button></div><div class="form-section"><div class="form-grid"><label>Nombre<input v-model="edit.firstName" class="form-control" required /></label><label>Apellido paterno<input v-model="edit.paternalSurname" class="form-control" required /></label><label>Apellido materno<input v-model="edit.maternalSurname" class="form-control" required /></label><label>CURP<input v-model="edit.curp" class="form-control" required /></label><label>RFC<input v-model="edit.rfc" class="form-control" required /></label><label>Fecha nacimiento<input v-model="edit.birthDate" type="date" class="form-control" required /></label><label>Edad<input v-model="edit.age" type="number" class="form-control" required /></label><label>Correo<input v-model="edit.contactEmail" type="email" class="form-control" required /></label><label>Telefono contacto<input v-model="edit.contactMobile" class="form-control" required /></label><label>Telefono personal<input v-model="edit.personalMobile" class="form-control" required /></label><label>Telefono trabajo<input v-model="edit.workPhone" class="form-control" required /></label><label>Taller<select v-model="edit.workshopId" class="form-select"><option v-for="workshop in workshops" :key="workshop.id" :value="workshop.id">{{ workshop.name }}</option></select></label><label>Calle<input v-model="edit.street" class="form-control" required /></label><label>Localidad<input v-model="edit.locality" class="form-control" required /></label><label>Municipio<input v-model="edit.municipality" class="form-control" required /></label><label>Estado<input v-model="edit.state" class="form-control" required /></label><label>CP<input v-model="edit.postalCode" class="form-control" required /></label><label>Fotografia<input id="edit-client-photo" type="file" accept="image/*" class="form-control" required /></label></div></div><button class="btn btn-danger">Guardar cambios</button></form>
+  <section v-if="selectedClient" class="vehicle-modal" role="dialog"><div class="vehicle-dialog"><div class="section-heading client-heading"><h2>Vehiculos de {{ selectedClient.fullName }}</h2><button class="btn btn-outline-dark btn-sm" @click="selectedClient = null">Cerrar</button></div><form class="client-form" @submit.prevent="addVehicle"><div class="form-grid"><label>VIN<input v-model="vehicle.vin" class="form-control" maxlength="17" required /></label><label>Placa<input v-model="vehicle.plate" class="form-control" required /></label><label>Marca<select v-model="vehicle.brand" class="form-select" required @change="loadModels"><option value="" disabled>Selecciona marca</option><option v-for="brand in brands" :key="brand" :value="brand">{{ brand }}</option></select></label><label>Modelo<select v-model="vehicle.model" class="form-select" required><option value="" disabled>Selecciona modelo</option><option v-for="model in models" :key="model" :value="model">{{ model }}</option></select></label><label>Ano<input v-model.number="vehicle.year" type="number" class="form-control" required /></label><label>Version<input v-model="vehicle.version" class="form-control" required /></label><label>Kilometraje<input v-model.number="vehicle.mileage" type="number" class="form-control" /></label><label>No. serie<input v-model="vehicle.serialNumber" class="form-control" /></label></div><button class="btn btn-danger">Asociar vehiculo</button></form><ul class="vehicle-list"><li v-for="item in vehicles" :key="item.id">{{ item.brand }} {{ item.model }} {{ item.year }} - {{ item.plate }}</li></ul></div></section>
+</section></template>

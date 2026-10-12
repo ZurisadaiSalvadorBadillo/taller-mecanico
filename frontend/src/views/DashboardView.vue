@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import ClientRegistrationForm from './ClientRegistrationForm.vue'
 import ClientManagementView from './ClientManagementView.vue'
 import WorkshopRegistrationForm from './WorkshopRegistrationForm.vue'
+import UserStatusCatalogView from './UserStatusCatalogView.vue'
 
 const props = defineProps({
   user: {
@@ -15,13 +16,13 @@ defineEmits(['logout'])
 
 const roleMessage = computed(() => {
   const role = props.user.role
-  if (role === 'GERENTE') return 'Acceso completo: usuarios, ordenes, reportes y permisos.'
-  if (role === 'RECEPCIONISTA') return 'Puedes registrar clientes y mantener actualizados sus datos de contacto.'
+  if (role === 'ADMINISTRADOR') return 'Acceso completo a clientes, estatus y suspension.'
+  if (role === 'SECRETARIA') return 'Puedes registrar, actualizar clientes y asociar vehiculos.'
   if (role === 'MECANICO') return 'Puedes actualizar el estatus de los vehiculos asignados.'
   return 'Puedes consultar el estatus de tu vehiculo y el historial de servicio.'
 })
 
-const canRegisterClients = computed(() => ['GERENTE', 'RECEPCIONISTA'].includes(props.user.role))
+const canRegisterClients = computed(() => ['ADMINISTRADOR', 'SECRETARIA'].includes(props.user.role))
 const clientsVersion = ref(0)
 const workshopsVersion = ref(0)
 const activeView = ref('workshops')
@@ -84,6 +85,7 @@ const platformOptions = computed(() => {
       <aside class="sidebar">
         <button v-if="canRegisterClients" class="nav-button" :class="{ active: activeView === 'workshops' }" type="button" @click="activeView = 'workshops'">Registro de talleres</button>
         <button v-if="canRegisterClients" class="nav-button" :class="{ active: activeView === 'clients' }" type="button" @click="activeView = 'clients'">Gestion de clientes</button>
+        <button v-if="user.role === 'ADMINISTRADOR'" class="nav-button" :class="{ active: activeView === 'statuses' }" type="button" @click="activeView = 'statuses'">Catalogo de estatus</button>
       </aside>
 
       <section class="workspace">
@@ -114,8 +116,9 @@ const platformOptions = computed(() => {
         <WorkshopRegistrationForm v-if="canRegisterClients && activeView === 'workshops'" @registered="workshopsVersion += 1" />
         <template v-if="canRegisterClients && activeView === 'clients'">
           <ClientRegistrationForm :key="workshopsVersion" @registered="clientsVersion += 1" />
-          <ClientManagementView :key="`${workshopsVersion}-${clientsVersion}`" />
+          <ClientManagementView :key="`${workshopsVersion}-${clientsVersion}`" :role="user.role" />
         </template>
+        <UserStatusCatalogView v-if="user.role === 'ADMINISTRADOR' && activeView === 'statuses'" />
 
         <div class="section-heading">
           <div>

@@ -1,48 +1,47 @@
 flowchart LR
-  subgraph Frontend[Frontend Vue.js]
-    Menu[DashboardView - Menu lateral]
-    TallerForm[WorkshopRegistrationForm]
-    ClienteForm[ClientRegistrationForm]
-    ClienteGestion[ClientManagementView]
-    ApiClient[services/api.js - JWT]
-    Menu --> TallerForm
-    Menu --> ClienteForm
-    Menu --> ClienteGestion
-    TallerForm --> ApiClient
-    ClienteForm --> ApiClient
-    ClienteGestion --> ApiClient
+  subgraph Vue[Vue.js]
+    Menu[DashboardView]
+    Taller[WorkshopRegistrationForm]
+    Cliente[ClientRegistrationForm]
+    Gestion[ClientManagementView]
+    Estatus[UserStatusCatalogView]
+    VPIC[NHTSA vPIC API]
+    Menu --> Taller & Cliente & Gestion & Estatus
+    Gestion --> VPIC
   end
-
-  subgraph Seguridad[Spring Security]
-    Jwt[JwtAuthenticationFilter]
-    Rbac[SecurityConfig + @PreAuthorize]
-    Jwt --> Rbac
+  subgraph RBAC[JWT y RBAC]
+    JWT[JwtAuthenticationFilter]
+    Guard[SecurityConfig y PreAuthorize]
+    JWT --> Guard
   end
-
-  subgraph Api[API Spring Boot]
-    WorkshopApi[WorkshopController\nPOST/GET /api/workshops]
-    ClientApi[ClientController\nPOST/GET/PUT/PATCH /api/clients]
-    WorkshopFacade[WorkshopRegistrationFacade]
-    ClientFacade[ClientRegistrationFacade]
+  subgraph Spring[Spring Boot API]
+    WC[WorkshopController]
+    CC[ClientController]
+    SC[UserStatusController]
+    VC[VehicleController]
+    WF[WorkshopRegistrationFacade]
+    CF[ClientRegistrationFacade]
+    SF[UserStatusService]
+    VF[VehicleService]
+    WC --> WF
+    CC --> CF
+    SC --> SF
+    VC --> VF
   end
-
-  subgraph Datos[Persistencia]
-    WorkshopRepo[WorkshopRepository]
-    ClientRepo[ClientRepository]
-    WorkshopEntity[(talleres)]
-    ClientEntity[(clientes\ntaller_id, status)]
-    WorkshopPhotos[(uploads/talleres)]
-    ClientPhotos[(uploads/clientes)]
+  subgraph Data[MariaDB y archivos]
+    W[(talleres)]
+    C[(clientes taller_id y status_usuario_id)]
+    S[(status_usuario)]
+    V[(vehiculos cliente_id)]
+    Photos[(uploads)]
   end
-
-  ApiClient --> Jwt
-  Rbac --> WorkshopApi
-  Rbac --> ClientApi
-  WorkshopApi --> WorkshopFacade --> WorkshopRepo --> WorkshopEntity
-  WorkshopFacade --> WorkshopPhotos
-  ClientApi --> ClientFacade --> ClientRepo --> ClientEntity
-  ClientFacade --> WorkshopRepo
-  ClientFacade --> ClientPhotos
-
-  Rbac -. GERENTE o RECEPCIONISTA .-> WorkshopApi
-  Rbac -. GERENTE o RECEPCIONISTA: suspension .-> ClientApi
+  Taller & Cliente & Gestion & Estatus --> JWT
+  Guard --> WC & CC & SC & VC
+  WF --> W & Photos
+  CF --> C & W & S & Photos
+  SF --> S
+  VF --> V & C
+  Guard -. ADMINISTRADOR y SECRETARIA .-> WC
+  Guard -. ADMINISTRADOR y SECRETARIA .-> CC
+  Guard -. solo ADMINISTRADOR .-> SC
+  Guard -. solo ADMINISTRADOR suspende .-> CC

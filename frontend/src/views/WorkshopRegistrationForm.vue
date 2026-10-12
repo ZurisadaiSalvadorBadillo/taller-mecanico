@@ -4,7 +4,7 @@ import api from '../services/api'
 
 const emit = defineEmits(['registered'])
 const rfcPattern = /^[A-Z&Ñ]{3,4}[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])[A-Z0-9]{3}$/
-const emptyForm = () => ({ name: '', state: '', postalCode: '', municipality: '', neighborhood: '', street: '', businessName: '', phone: '', rfc: '', email: '' })
+const emptyForm = () => ({ name: '', state: '', postalCode: '', municipality: '', neighborhood: '', locality: '', street: '', businessName: '', phone: '', rfc: '', email: '' })
 const form = reactive(emptyForm())
 const photo = ref(null)
 const loading = ref(false)
@@ -78,6 +78,7 @@ async function registerWorkshop() {
           <label>Codigo postal<input v-model.trim="form.postalCode" class="form-control" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" required /></label>
           <label>Municipio<input v-model.trim="form.municipality" class="form-control" maxlength="120" required /></label>
           <label>Colonia<input v-model.trim="form.neighborhood" class="form-control" maxlength="120" required /></label>
+          <label>Localidad<input v-model.trim="form.locality" class="form-control" maxlength="120" required /></label>
           <label>Calle<input v-model.trim="form.street" class="form-control" maxlength="160" required /></label>
         </div>
       </div>
