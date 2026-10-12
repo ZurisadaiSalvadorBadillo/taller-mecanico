@@ -20,7 +20,7 @@
 | Estatus | `UserStatus` | Entidad | Implementa tabla `status_usuario` con id, str_valor, str_descripcion y actualizado. |
 | Estatus | `UserStatusSeeder` | Configuracion | Inserta ACTIVO, SUSPENDIDO, CANCELADO y ELIMINADO al iniciar. |
 | Estatus | `UserStatusRepository` | Repository | Consulta el catalogo y localiza estatus por valor. |
-| Estatus | `UserStatusService.list`, `create`, `update`, `delete`, `required` | Servicio | Implementa CRUD y baja logica mediante valor ELIMINADO. |
+| Estatus | `UserStatusService.list`, `create`, `update`, `delete`, `required` | Servicio | Implementa CRUD y baja logica con la marca `deleted`, sin borrar el registro fisicamente. |
 | Estatus | `UserStatusController` | Controlador | Restringe el CRUD completo de estatus a ADMINISTRADOR. |
 | API | `GET/POST /api/user-statuses` | Endpoints | Consulta y crea elementos de catalogo. |
 | API | `PUT/DELETE /api/user-statuses/{id}` | Endpoints | Actualiza y elimina logicamente elementos de catalogo. |
