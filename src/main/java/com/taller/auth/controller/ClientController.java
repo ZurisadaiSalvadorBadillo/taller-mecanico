@@ -44,7 +44,7 @@ public class ClientController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SECRETARIA')")
     public ResponseEntity<Page<ClientSummaryResponse>> list(
-            @RequestParam Long workshopId,
+            @RequestParam(required = false) Long workshopId,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) @Max(10) int size,
             @RequestParam(defaultValue = "ASC") String sortDirection

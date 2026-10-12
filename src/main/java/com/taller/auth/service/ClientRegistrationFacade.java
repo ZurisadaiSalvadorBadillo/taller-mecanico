@@ -79,7 +79,8 @@ public class ClientRegistrationFacade {
     @Transactional(readOnly = true)
     public Page<ClientSummaryResponse> listRegisteredClients(Long workshopId, int page, int size, Sort.Direction sortDirection) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortDirection, "fullName"));
-        return clientRepository.findByWorkshopId(workshopId, pageRequest).map(this::toSummary);
+        return (workshopId == null ? clientRepository.findAll(pageRequest) : clientRepository.findByWorkshopId(workshopId, pageRequest))
+                .map(this::toSummary);
     }
 
     @Transactional

@@ -47,7 +47,7 @@ public class WorkshopRegistrationFacade {
             workshop.setPhotoContentType(photo.contentType());
             workshop.setCreatedAt(Instant.now());
             Workshop saved = workshopRepository.save(workshop);
-            return new WorkshopSummaryResponse(saved.getId(), saved.getName());
+            return toSummary(saved);
         } catch (RuntimeException exception) {
             photoStorage.deleteQuietly(photo.filename());
             throw exception;
@@ -57,7 +57,14 @@ public class WorkshopRegistrationFacade {
     @Transactional(readOnly = true)
     public List<WorkshopSummaryResponse> list() {
         return workshopRepository.findAllByOrderByNameAsc().stream()
-                .map(workshop -> new WorkshopSummaryResponse(workshop.getId(), workshop.getName()))
+                .map(this::toSummary)
                 .toList();
+    }
+
+    private WorkshopSummaryResponse toSummary(Workshop workshop) {
+        return new WorkshopSummaryResponse(workshop.getId(), workshop.getName(), workshop.getBusinessName(),
+                workshop.getPhone(), workshop.getEmail(), workshop.getRfc(), workshop.getStreet(),
+                workshop.getNeighborhood(), workshop.getLocality(), workshop.getMunicipality(), workshop.getState(),
+                workshop.getPostalCode());
     }
 }
