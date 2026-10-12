@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserStatusRepository extends JpaRepository<UserStatus, Long> {
     Optional<UserStatus> findByValue(String value);
-    List<UserStatus> findByValueNotOrderByValueAsc(String value);
+    List<UserStatus> findByDeletedFalseOrderByValueAsc();
 }

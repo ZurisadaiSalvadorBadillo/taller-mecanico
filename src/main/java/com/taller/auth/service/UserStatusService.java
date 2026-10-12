@@ -14,12 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserStatusService {
     private final UserStatusRepository repository;
     public UserStatusService(UserStatusRepository repository) { this.repository = repository; }
-    @Transactional(readOnly = true) public List<UserStatusResponse> list() { return repository.findByValueNotOrderByValueAsc("ELIMINADO").stream().map(this::toResponse).toList(); }
+    @Transactional(readOnly = true) public List<UserStatusResponse> list() { return repository.findByDeletedFalseOrderByValueAsc().stream().map(this::toResponse).toList(); }
     @Transactional public UserStatusResponse create(UserStatusRequest request) { return toResponse(repository.save(build(new UserStatus(), request))); }
     @Transactional public UserStatusResponse update(Long id, UserStatusRequest request) { return toResponse(repository.save(build(find(id), request))); }
-    @Transactional public void delete(Long id) { UserStatus status = find(id); status.setValue("ELIMINADO"); status.setDescription("Registro eliminado logicamente."); repository.save(status); }
+    @Transactional public void delete(Long id) { UserStatus status = find(id); status.setDeleted(true); status.setActualizado(Instant.now()); repository.save(status); }
     @Transactional(readOnly = true) public UserStatus required(String value) { return repository.findByValue(value).orElseThrow(() -> new IllegalArgumentException("El estatus " + value + " no esta disponible.")); }
     private UserStatus find(Long id) { return repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Estatus no encontrado.")); }
-    private UserStatus build(UserStatus target, UserStatusRequest request) { target.setValue(request.value().trim().toUpperCase(Locale.ROOT)); target.setDescription(request.description().trim()); target.setActualizado(Instant.now()); return target; }
+    private UserStatus build(UserStatus target, UserStatusRequest request) { target.setValue(request.value().trim().toUpperCase(Locale.ROOT)); target.setDescription(request.description().trim()); target.setDeleted(false); target.setActualizado(Instant.now()); return target; }
     private UserStatusResponse toResponse(UserStatus value) { return new UserStatusResponse(value.getId(), value.getValue(), value.getDescription(), value.getActualizado().toString()); }
 }

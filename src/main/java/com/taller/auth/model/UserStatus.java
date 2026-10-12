@@ -24,12 +24,17 @@ public class UserStatus {
     @Column(nullable = false)
     private Instant actualizado;
 
+    @Column(nullable = false)
+    private boolean deleted;
+
     public Long getId() { return id; }
     public String getValue() { return value; }
     public String getDescription() { return description; }
     public Instant getActualizado() { return actualizado; }
+    public boolean isDeleted() { return deleted; }
     public void setValue(String value) { this.value = value; }
     public void setDescription(String description) { this.description = description; }
     public void setActualizado(Instant actualizado) { this.actualizado = actualizado; }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
     @PreUpdate public void touch() { actualizado = Instant.now(); }
 }
