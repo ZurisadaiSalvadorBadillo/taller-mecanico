@@ -4,6 +4,7 @@ import ClientRegistrationForm from './ClientRegistrationForm.vue'
 import ClientManagementView from './ClientManagementView.vue'
 import WorkshopRegistrationForm from './WorkshopRegistrationForm.vue'
 import UserStatusCatalogView from './UserStatusCatalogView.vue'
+import RegisteredWorkshopsView from './RegisteredWorkshopsView.vue'
 
 const props = defineProps({
   user: {
@@ -114,6 +115,7 @@ const platformOptions = computed(() => {
         </div>
 
         <WorkshopRegistrationForm v-if="canRegisterClients && activeView === 'workshops'" @registered="workshopsVersion += 1" />
+        <RegisteredWorkshopsView v-if="canRegisterClients && activeView === 'workshops'" :key="workshopsVersion" />
         <template v-if="canRegisterClients && activeView === 'clients'">
           <ClientRegistrationForm :key="workshopsVersion" @registered="clientsVersion += 1" />
           <ClientManagementView :key="`${workshopsVersion}-${clientsVersion}`" :role="user.role" />

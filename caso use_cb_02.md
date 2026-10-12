@@ -57,6 +57,11 @@
 | Frontend | `ClientManagementView: selectedClient`, `vehicle`, `brands`, `models`, `vehicles` | Estados | Controlan el modal y la informacion del vehiculo. |
 | Frontend | `ClientManagementView: openVehicles`, `loadBrands`, `loadModels`, `addVehicle` | Funciones | Abren el modal, consumen NHTSA vPIC y registran el vehiculo. |
 | Frontend | `DashboardView.vue` | Componente modificado | Incorpora menu de talleres, clientes y catalogo de estatus visible solo al administrador. |
+| Frontend | `RegisteredWorkshopsView.vue` | Componente | Presenta todos los talleres registrados con datos fiscales, contacto y direccion completa. |
+| Frontend | `ClientManagementView: workshopId` | Estado modificado | Inicia en "Todos los talleres" y permite aplicar un filtro individual opcional. |
+| Backend | `ClientController.list`, `ClientRegistrationFacade.listRegisteredClients` | Endpoint y fachada modificados | Admiten consulta paginada global cuando no se recibe `workshopId`. |
+| Backend | `WorkshopSummaryResponse`, `WorkshopRegistrationFacade.toSummary` | DTO y metodo modificados | Devuelven los datos completos requeridos para visualizar talleres registrados. |
+| Backend | `DemoDataSeeder` | Configuracion de datos | Crea de forma idempotente 5 talleres demo y 10 usuarios demo al arrancar con base de datos disponible. |
 | Documentacion | `diagrama_componentes.mmd` | Mermaid | Describe Vue, API, JWT/RBAC, catalogo, clientes, vehiculos, repositorios y almacenamiento. |
 
 ## Fuente externa
